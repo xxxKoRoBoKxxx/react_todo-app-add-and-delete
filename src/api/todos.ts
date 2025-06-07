@@ -6,3 +6,11 @@ export const USER_ID = 2988;
 export const getTodos = () => {
   return client.get<Todo[]>(`/todos?userId=${USER_ID}`);
 };
+
+export const createTodo = (title: string) => {
+  return client.post<Todo>('/todos', {
+    title,
+    userId: USER_ID,
+    completed: false,
+  });
+};

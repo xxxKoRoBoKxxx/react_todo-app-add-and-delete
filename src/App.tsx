@@ -2,10 +2,11 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useEffect, useState } from 'react';
 
-import { getTodos, USER_ID } from './api/todos';
+import { createTodo, getTodos, USER_ID } from './api/todos';
 import { wait } from './utils/fetchClient';
 import { filteringTodos } from './utils/queueTodos';
 import { countItemsLeft } from './utils/countItemsLeft';
+import { ErrorMsg } from './utils/ErrorMsg';
 import { Todo } from './types/Todo';
 import { TodoFilter } from './types/TodoFilter';
 
@@ -19,6 +20,7 @@ export const App: React.FC = () => {
   const [allTodos, setAllTodos] = useState<Todo[]>([]);
   const [filter, setFilter] = useState<TodoFilter>('All');
   const [error, setError] = useState<string>('');
+  const [tempTodo, setTempTodo] = useState<Todo | null>(null);
 
   useEffect(() => {
     getTodos()
@@ -26,7 +28,7 @@ export const App: React.FC = () => {
         setAllTodos(todosRecieved);
       })
       .catch(() => {
-        setError('Unable to load todos');
+        setError(ErrorMsg.LIST_LOAD_ERROR);
         wait(3000).then(() => setError(''));
       });
   }, []);
@@ -38,13 +40,38 @@ export const App: React.FC = () => {
   const queuedTodos: Todo[] = filteringTodos(allTodos, filter);
   const itemsLeft: number = countItemsLeft(allTodos);
 
-  const applyTitle = (title: string) => {
+  // let errorTimerId: number = 0;
+
+  // const showErrorMsg = (message: string) => {
+
+  // };
+
+  const applyTitle = (
+    title: string,
+    setTitle: React.Dispatch<React.SetStateAction<string>>,
+  ) => {
     if (!title.trim().length) {
-      setError('Title should not be empty');
+      setError(ErrorMsg.EMPTY_TITLE);
       wait(3000).then(() => setError(''));
 
       return;
     }
+
+    setTempTodo({ id: 0, title, userId: USER_ID, completed: false });
+
+    createTodo(title)
+      .then(todo => {
+        setTempTodo(null);
+        setTitle('');
+
+        setAllTodos([...allTodos, todo]);
+      })
+      .catch(() => {
+        setTempTodo(null);
+
+        setError(ErrorMsg.ADD_TODO_ERROR);
+        wait(3000).then(() => setError(''));
+      });
   };
 
   return (
@@ -52,9 +79,9 @@ export const App: React.FC = () => {
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <Header applyTitle={applyTitle} />
+        <Header applyTitle={applyTitle} tempTodo={tempTodo} />
 
-        <TodoList todos={queuedTodos} />
+        <TodoList todos={queuedTodos} tempTodo={tempTodo} />
 
         {allTodos.length > 0 && (
           <Footer filter={filter} setFilter={setFilter} itemsLeft={itemsLeft} />
