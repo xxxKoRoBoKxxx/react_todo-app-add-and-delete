@@ -2,11 +2,16 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useEffect, useState } from 'react';
 
-import { createTodo, getTodos, USER_ID } from './api/todos';
+import {
+  createTodo,
+  deleteTodoFromServer,
+  getTodos,
+  USER_ID,
+} from './api/todos';
 import { wait } from './utils/fetchClient';
 import { filteringTodos } from './utils/queueTodos';
 import { countItemsLeft } from './utils/countItemsLeft';
-import { ErrorMsg } from './utils/ErrorMsg';
+import { errorMsg } from './utils/ErrorMsg';
 import { Todo } from './types/Todo';
 import { TodoFilter } from './types/TodoFilter';
 
@@ -25,11 +30,19 @@ export const App: React.FC = () => {
   useEffect(() => {
     getTodos()
       .then(todosRecieved => {
-        setAllTodos(todosRecieved);
+        setAllTodos(() =>
+          todosRecieved.map(todo => {
+            const newTodo = todo;
+
+            newTodo.loading = false;
+
+            return newTodo;
+          }),
+        );
       })
       .catch(() => {
-        setError(ErrorMsg.LIST_LOAD_ERROR);
-        wait(3000).then(() => setError(''));
+        setError(errorMsg.LIST_LOAD_ERROR);
+        wait(3000, true).then(() => setError(''));
       });
   }, []);
 
@@ -37,29 +50,44 @@ export const App: React.FC = () => {
     return <UserWarning />;
   }
 
+  const completedTodos: Todo[] = allTodos.filter(todo => todo.completed);
   const queuedTodos: Todo[] = filteringTodos(allTodos, filter);
   const itemsLeft: number = countItemsLeft(allTodos);
 
-  // let errorTimerId: number = 0;
+  const setLoading = (todoId: number, load: boolean) => {
+    setAllTodos(() => {
+      const newTodos = [...allTodos];
 
-  // const showErrorMsg = (message: string) => {
+      const deletingTodo = newTodos.find(todo => todo.id === todoId);
 
-  // };
+      if (deletingTodo) {
+        deletingTodo.loading = load;
+      }
+
+      return newTodos;
+    });
+  };
 
   const applyTitle = (
     title: string,
     setTitle: React.Dispatch<React.SetStateAction<string>>,
   ) => {
     if (!title.trim().length) {
-      setError(ErrorMsg.EMPTY_TITLE);
-      wait(3000).then(() => setError(''));
+      setError(errorMsg.EMPTY_TITLE);
+      wait(3000, true).then(() => setError(''));
 
       return;
     }
 
-    setTempTodo({ id: 0, title, userId: USER_ID, completed: false });
+    setTempTodo({
+      id: 0,
+      title: title.trim(),
+      userId: USER_ID,
+      completed: false,
+      loading: true,
+    });
 
-    createTodo(title)
+    createTodo(title.trim())
       .then(todo => {
         setTempTodo(null);
         setTitle('');
@@ -69,22 +97,58 @@ export const App: React.FC = () => {
       .catch(() => {
         setTempTodo(null);
 
-        setError(ErrorMsg.ADD_TODO_ERROR);
-        wait(3000).then(() => setError(''));
+        setError(errorMsg.ADD_TODO_ERROR);
+        wait(3000, true).then(() => setError(''));
       });
   };
+
+  const deleteTodo = (todoId: number): void => {
+    setLoading(todoId, true);
+
+    console.log('loading');
+
+    deleteTodoFromServer(todoId)
+      .then(() => {
+        console.log('set array');
+
+        setAllTodos(allTodos.filter(todo => todo.id !== todoId));
+      })
+      .catch(() => {
+        setLoading(todoId, false);
+
+        setError(errorMsg.DELETE_TODO_ERROR);
+        wait(3000, true).then(() => setError(''));
+      });
+  };
+
+  console.log(queuedTodos);
+  console.log(completedTodos);
 
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <Header applyTitle={applyTitle} tempTodo={tempTodo} />
+        <Header
+          applyTitle={applyTitle}
+          tempTodo={tempTodo}
+          allTodos={allTodos}
+        />
 
-        <TodoList todos={queuedTodos} tempTodo={tempTodo} />
+        <TodoList
+          todos={queuedTodos}
+          tempTodo={tempTodo}
+          deleteTodo={deleteTodo}
+        />
 
         {allTodos.length > 0 && (
-          <Footer filter={filter} setFilter={setFilter} itemsLeft={itemsLeft} />
+          <Footer
+            filter={filter}
+            setFilter={setFilter}
+            itemsLeft={itemsLeft}
+            deleteTodo={deleteTodo}
+            completedTodos={completedTodos}
+          />
         )}
       </div>
 

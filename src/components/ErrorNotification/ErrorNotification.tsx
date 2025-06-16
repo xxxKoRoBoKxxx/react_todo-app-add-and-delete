@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import React from 'react';
+import { errorTimeoutId } from '../../utils/fetchClient';
 
 type Props = {
   error: string;
@@ -21,7 +22,10 @@ export const ErrorNotification: React.FC<Props> = ({ error, setError }) => (
       data-cy="HideErrorButton"
       type="button"
       className="delete"
-      onClick={() => setError('')}
+      onClick={() => {
+        window.clearTimeout(errorTimeoutId);
+        setError('');
+      }}
     />
     {error}
     {/* <br />

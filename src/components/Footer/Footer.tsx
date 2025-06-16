@@ -2,14 +2,23 @@ import React from 'react';
 
 import { TodoFilter } from '../../types/TodoFilter';
 import classNames from 'classnames';
+import { Todo } from '../../types/Todo';
 
 type Props = {
   filter: TodoFilter;
   setFilter: React.Dispatch<React.SetStateAction<TodoFilter>>;
   itemsLeft: number;
+  completedTodos: Todo[];
+  deleteTodo: (todoId: number) => void;
 };
 
-export const Footer: React.FC<Props> = ({ filter, setFilter, itemsLeft }) => (
+export const Footer: React.FC<Props> = ({
+  filter,
+  setFilter,
+  itemsLeft,
+  completedTodos,
+  deleteTodo,
+}) => (
   <footer className="todoapp__footer" data-cy="Footer">
     <span className="todo-count" data-cy="TodosCounter">
       {itemsLeft} items left
@@ -54,6 +63,10 @@ export const Footer: React.FC<Props> = ({ filter, setFilter, itemsLeft }) => (
       type="button"
       className="todoapp__clear-completed"
       data-cy="ClearCompletedButton"
+      disabled={!Boolean(completedTodos.length)}
+      onClick={() => {
+        completedTodos.forEach(completedTodo => deleteTodo(completedTodo.id));
+      }}
     >
       Clear completed
     </button>

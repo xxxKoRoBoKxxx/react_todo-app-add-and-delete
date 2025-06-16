@@ -14,3 +14,7 @@ export const createTodo = (title: string) => {
     completed: false,
   });
 };
+
+export const deleteTodoFromServer = (todoId: number) => {
+  return client.delete('/todos/' + todoId);
+};

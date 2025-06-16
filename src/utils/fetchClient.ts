@@ -2,9 +2,16 @@
 const BASE_URL = 'https://mate.academy/students-api';
 
 // returns a promise resolved after a given delay
-export function wait(delay: number) {
+export let errorTimeoutId: number = 0;
+
+export function wait(delay: number, error?: boolean) {
   return new Promise(resolve => {
-    setTimeout(resolve, delay);
+    if (error) {
+      clearTimeout(errorTimeoutId);
+      errorTimeoutId = window.setTimeout(resolve, delay);
+    } else {
+      setTimeout(resolve, delay);
+    }
   });
 }
 

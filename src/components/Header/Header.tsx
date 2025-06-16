@@ -7,6 +7,7 @@ type Props = {
     setTitle: React.Dispatch<React.SetStateAction<string>>,
   ) => void;
   tempTodo: Todo | null;
+  allTodos: Todo[];
 };
 
 export const Header: React.FC<Props> = ({ applyTitle, tempTodo }) => {
