@@ -102,27 +102,26 @@ export const App: React.FC = () => {
       });
   };
 
-  const deleteTodo = (todoId: number): void => {
+  const deleteTodo = (todoId: number, clearCompletedTodos?: boolean): void => {
     setLoading(todoId, true);
 
-    console.log('loading');
+    wait(200).then(() => {
+      deleteTodoFromServer(todoId)
+        .then(() => {
+          if (clearCompletedTodos) {
+            return;
+          } else {
+            setAllTodos(allTodos.filter(todo => todo.id !== todoId));
+          }
+        })
+        .catch(() => {
+          setLoading(todoId, false);
 
-    deleteTodoFromServer(todoId)
-      .then(() => {
-        console.log('set array');
-
-        setAllTodos(allTodos.filter(todo => todo.id !== todoId));
-      })
-      .catch(() => {
-        setLoading(todoId, false);
-
-        setError(errorMsg.DELETE_TODO_ERROR);
-        wait(3000, true).then(() => setError(''));
-      });
+          setError(errorMsg.DELETE_TODO_ERROR);
+          wait(3000, true).then(() => setError(''));
+        });
+    });
   };
-
-  console.log(queuedTodos);
-  console.log(completedTodos);
 
   return (
     <div className="todoapp">
@@ -143,10 +142,11 @@ export const App: React.FC = () => {
 
         {allTodos.length > 0 && (
           <Footer
-            filter={filter}
             setFilter={setFilter}
-            itemsLeft={itemsLeft}
+            setAllTodos={setAllTodos}
             deleteTodo={deleteTodo}
+            filter={filter}
+            itemsLeft={itemsLeft}
             completedTodos={completedTodos}
           />
         )}

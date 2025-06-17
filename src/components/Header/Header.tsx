@@ -10,7 +10,7 @@ type Props = {
   allTodos: Todo[];
 };
 
-export const Header: React.FC<Props> = ({ applyTitle, tempTodo }) => {
+export const Header: React.FC<Props> = ({ applyTitle, tempTodo, allTodos }) => {
   const [title, setTitle] = useState<string>('');
 
   const handleSubmit = () => {
@@ -20,10 +20,14 @@ export const Header: React.FC<Props> = ({ applyTitle, tempTodo }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (allTodos.find(todo => todo.loading)) {
+      return;
+    }
+
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [tempTodo]);
+  }, [allTodos, tempTodo]);
 
   return (
     <header className="todoapp__header">
