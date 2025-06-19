@@ -14,7 +14,9 @@ type Props = {
 export const Header: React.FC<Props> = ({ applyTitle, tempTodo, allTodos }) => {
   const [title, setTitle] = useState<string>('');
 
-  const handleSubmit = () => {
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     applyTitle(title, setTitle);
   };
 
@@ -39,13 +41,7 @@ export const Header: React.FC<Props> = ({ applyTitle, tempTodo, allTodos }) => {
         data-cy="ToggleAllButton"
       />
 
-      <form
-        onSubmit={event => {
-          event.preventDefault();
-
-          handleSubmit();
-        }}
-      >
+      <form onSubmit={handleFormSubmit}>
         <input
           data-cy="NewTodoField"
           type="text"

@@ -11,9 +11,9 @@ import {
 import { wait } from './utils/fetchClient';
 import { filteringTodos } from './utils/queueTodos';
 import { countItemsLeft } from './utils/countItemsLeft';
-import { errorMsg } from './utils/ErrorMsg';
+import { ErrorMsg } from './utils/ErrorMsg';
 import { Todo } from './types/Todo';
-import { TodoFilter } from './types/TodoFilter';
+import { TodoFilter } from './utils/TodoFilter';
 
 import { UserWarning } from './UserWarning';
 import { Header } from './components/Header';
@@ -23,26 +23,15 @@ import { ErrorNotification } from './components/ErrorNotification';
 
 export const App: React.FC = () => {
   const [allTodos, setAllTodos] = useState<Todo[]>([]);
-  const [filter, setFilter] = useState<TodoFilter>('All');
+  const [filter, setFilter] = useState<TodoFilter>(TodoFilter.ALL);
   const [error, setError] = useState<string>('');
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
 
   useEffect(() => {
     getTodos()
-      .then(todosRecieved => {
-        setAllTodos(() =>
-          todosRecieved.map(todo => {
-            const newTodo = todo;
-
-            newTodo.loading = false;
-
-            return newTodo;
-          }),
-        );
-      })
+      .then(setAllTodos)
       .catch(() => {
-        setError(errorMsg.LIST_LOAD_ERROR);
-        wait(3000, true).then(() => setError(''));
+        setError(ErrorMsg.LIST_LOAD_ERROR);
       });
   }, []);
 
@@ -73,7 +62,7 @@ export const App: React.FC = () => {
     setTitle: React.Dispatch<React.SetStateAction<string>>,
   ) => {
     if (!title.trim().length) {
-      setError(errorMsg.EMPTY_TITLE);
+      setError(ErrorMsg.EMPTY_TITLE);
       wait(3000, true).then(() => setError(''));
 
       return;
@@ -97,7 +86,7 @@ export const App: React.FC = () => {
       .catch(() => {
         setTempTodo(null);
 
-        setError(errorMsg.ADD_TODO_ERROR);
+        setError(ErrorMsg.ADD_TODO_ERROR);
         wait(3000, true).then(() => setError(''));
       });
   };
@@ -115,7 +104,7 @@ export const App: React.FC = () => {
         .catch(() => {
           setLoading(todoId, false);
 
-          setError(errorMsg.DELETE_TODO_ERROR);
+          setError(ErrorMsg.DELETE_TODO_ERROR);
           wait(3000, true).then(() => setError(''));
         });
     });

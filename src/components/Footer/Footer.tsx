@@ -1,10 +1,10 @@
 import React from 'react';
 
 import classNames from 'classnames';
-import { TodoFilter } from '../../types/TodoFilter';
+import { TodoFilter } from '../../utils/TodoFilter';
 import { Todo } from '../../types/Todo';
 import { deleteTodoFromServer } from '../../api/todos';
-import { errorMsg } from '../../utils/ErrorMsg';
+import { ErrorMsg } from '../../utils/ErrorMsg';
 
 type Props = {
   setError: React.Dispatch<React.SetStateAction<string>>;
@@ -34,7 +34,7 @@ export const Footer: React.FC<Props> = ({
       );
 
       if (results.find(result => result.status === 'rejected')) {
-        setError(errorMsg.DELETE_TODO_ERROR);
+        setError(ErrorMsg.DELETE_TODO_ERROR);
       }
 
       setAllTodos(currentTodos =>
@@ -50,36 +50,19 @@ export const Footer: React.FC<Props> = ({
       </span>
 
       <nav className="filter" data-cy="Filter">
-        <a
-          href="#/"
-          className={classNames('filter__link', { selected: filter === 'All' })}
-          data-cy="FilterLinkAll"
-          onClick={() => setFilter('All')}
-        >
-          All
-        </a>
-
-        <a
-          href="#/active"
-          className={classNames('filter__link', {
-            selected: filter === 'Active',
-          })}
-          data-cy="FilterLinkActive"
-          onClick={() => setFilter('Active')}
-        >
-          Active
-        </a>
-
-        <a
-          href="#/completed"
-          className={classNames('filter__link', {
-            selected: filter === 'Completed',
-          })}
-          data-cy="FilterLinkCompleted"
-          onClick={() => setFilter('Completed')}
-        >
-          Completed
-        </a>
+        {Object.values(TodoFilter).map(filterName => (
+          <a
+            key={filterName}
+            href="#/"
+            className={classNames('filter__link', {
+              selected: filter === filterName,
+            })}
+            data-cy={'FilterLink' + filterName}
+            onClick={() => setFilter(filterName)}
+          >
+            {filterName}
+          </a>
+        ))}
       </nav>
 
       <button

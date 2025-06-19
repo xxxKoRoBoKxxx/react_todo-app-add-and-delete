@@ -7,28 +7,30 @@ import { Todo } from '../../types/Todo';
 type Props = { todo: Todo; deleteTodo: (todoId: number) => void };
 
 export const TodoCard: React.FC<Props> = ({ todo, deleteTodo }) => {
+  const { id, title, completed, loading } = todo;
+
   const handleDelete = () => {
-    deleteTodo(todo.id);
+    deleteTodo(id);
   };
 
   return (
     <div
-      key={todo.id}
+      key={id}
       data-cy="Todo"
-      className={classNames('todo', { completed: todo.completed })}
+      className={classNames('todo', { completed: completed })}
     >
       <label className="todo__status-label">
         <input
           data-cy="TodoStatus"
           type="checkbox"
           className="todo__status"
-          checked={todo.completed}
+          checked={completed}
           onChange={() => {}}
         />
       </label>
 
       <span data-cy="TodoTitle" className="todo__title">
-        {todo.title}
+        {title}
       </span>
 
       <button
@@ -43,7 +45,7 @@ export const TodoCard: React.FC<Props> = ({ todo, deleteTodo }) => {
       <div
         data-cy="TodoLoader"
         className={classNames('modal', 'overlay', {
-          'is-active': todo.loading,
+          'is-active': loading,
         })}
       >
         <div className="modal-background has-background-white-ter" />
