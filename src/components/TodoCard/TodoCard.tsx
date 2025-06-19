@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import classNames from 'classnames';
 import React from 'react';
+
+import classNames from 'classnames';
 import { Todo } from '../../types/Todo';
 
 type Props = { todo: Todo; deleteTodo: (todoId: number) => void };
@@ -30,7 +31,6 @@ export const TodoCard: React.FC<Props> = ({ todo, deleteTodo }) => {
         {todo.title}
       </span>
 
-      {/* Remove button appears only on hover */}
       <button
         type="button"
         className="todo__remove"
@@ -40,7 +40,6 @@ export const TodoCard: React.FC<Props> = ({ todo, deleteTodo }) => {
         ×
       </button>
 
-      {/* overlay will cover the todo while it is being deleted or updated */}
       <div
         data-cy="TodoLoader"
         className={classNames('modal', 'overlay', {

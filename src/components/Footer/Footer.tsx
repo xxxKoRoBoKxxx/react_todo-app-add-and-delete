@@ -1,23 +1,24 @@
 import React from 'react';
 
-import { TodoFilter } from '../../types/TodoFilter';
 import classNames from 'classnames';
+import { TodoFilter } from '../../types/TodoFilter';
 import { Todo } from '../../types/Todo';
-import { wait } from '../../utils/fetchClient';
+import { deleteTodoFromServer } from '../../api/todos';
+import { errorMsg } from '../../utils/ErrorMsg';
 
 type Props = {
+  setError: React.Dispatch<React.SetStateAction<string>>;
   setFilter: React.Dispatch<React.SetStateAction<TodoFilter>>;
   setAllTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
-  deleteTodo: (todoId: number, clearCompletedTodos: boolean) => void;
   filter: TodoFilter;
   itemsLeft: number;
   completedTodos: Todo[];
 };
 
 export const Footer: React.FC<Props> = ({
+  setError,
   setFilter,
   setAllTodos,
-  deleteTodo,
   filter,
   itemsLeft,
   completedTodos,
@@ -25,21 +26,21 @@ export const Footer: React.FC<Props> = ({
   const handleClearCompleted = () => {
     const completedIds = completedTodos.map(todo => todo.id);
 
-    Promise.allSettled(completedIds.map(id => deleteTodo(id, true))).then(
-      results => {
-        const successfullyDeletedIds = completedIds.filter(
-          (id, index) => results[index].status === 'fulfilled',
-        );
+    Promise.allSettled(
+      completedIds.map(id => deleteTodoFromServer(id).then(() => id)),
+    ).then(results => {
+      const successfullyDeletedIds = completedIds.filter(
+        (id, index) => results[index].status === 'fulfilled',
+      );
 
-        wait(300).then(() => {
-          setAllTodos(currentTodos =>
-            currentTodos.filter(
-              todo => !successfullyDeletedIds.includes(todo.id),
-            ),
-          );
-        });
-      },
-    );
+      if (results.find(result => result.status === 'rejected')) {
+        setError(errorMsg.DELETE_TODO_ERROR);
+      }
+
+      setAllTodos(currentTodos =>
+        currentTodos.filter(todo => !successfullyDeletedIds.includes(todo.id)),
+      );
+    });
   };
 
   return (
@@ -48,7 +49,6 @@ export const Footer: React.FC<Props> = ({
         {itemsLeft} items left
       </span>
 
-      {/* Active link should have the 'selected' class */}
       <nav className="filter" data-cy="Filter">
         <a
           href="#/"
@@ -82,7 +82,6 @@ export const Footer: React.FC<Props> = ({
         </a>
       </nav>
 
-      {/* this button should be disabled if there are no completed todos */}
       <button
         type="button"
         className="todoapp__clear-completed"

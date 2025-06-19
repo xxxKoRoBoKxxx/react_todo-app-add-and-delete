@@ -108,9 +108,7 @@ export const App: React.FC = () => {
     wait(200).then(() => {
       deleteTodoFromServer(todoId)
         .then(() => {
-          if (clearCompletedTodos) {
-            return;
-          } else {
+          if (!clearCompletedTodos) {
             setAllTodos(allTodos.filter(todo => todo.id !== todoId));
           }
         })
@@ -142,9 +140,9 @@ export const App: React.FC = () => {
 
         {allTodos.length > 0 && (
           <Footer
+            setError={setError}
             setFilter={setFilter}
             setAllTodos={setAllTodos}
-            deleteTodo={deleteTodo}
             filter={filter}
             itemsLeft={itemsLeft}
             completedTodos={completedTodos}

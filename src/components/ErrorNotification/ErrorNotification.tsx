@@ -1,5 +1,6 @@
-import classNames from 'classnames';
 import React from 'react';
+
+import classNames from 'classnames';
 import { errorTimeoutId } from '../../utils/fetchClient';
 
 type Props = {
@@ -28,13 +29,5 @@ export const ErrorNotification: React.FC<Props> = ({ error, setError }) => (
       }}
     />
     {error}
-    {/* <br />
-    Title should not be empty
-    <br />
-    Unable to add a todo
-    <br />
-    Unable to delete a todo
-    <br />
-    Unable to update a todo */}
   </div>
 );

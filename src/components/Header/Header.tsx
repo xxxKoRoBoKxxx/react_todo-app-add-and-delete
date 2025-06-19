@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+
 import { Todo } from '../../types/Todo';
 
 type Props = {
@@ -38,7 +39,6 @@ export const Header: React.FC<Props> = ({ applyTitle, tempTodo, allTodos }) => {
         data-cy="ToggleAllButton"
       />
 
-      {/* Add a todo on form submit */}
       <form
         onSubmit={event => {
           event.preventDefault();
