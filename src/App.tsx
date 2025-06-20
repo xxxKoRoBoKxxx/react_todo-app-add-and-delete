@@ -44,20 +44,14 @@ export const App: React.FC = () => {
   const itemsLeft: number = countItemsLeft(allTodos);
 
   const setLoading = (todoId: number, load: boolean) => {
-    setAllTodos(() => {
-      const newTodos = [...allTodos];
-
-      const deletingTodo = newTodos.find(todo => todo.id === todoId);
-
-      if (deletingTodo) {
-        deletingTodo.loading = load;
-      }
-
-      return newTodos;
+    setAllTodos(currentTodos => {
+      return currentTodos.map(todo =>
+        todo.id === todoId ? { ...todo, loading: load } : todo,
+      );
     });
   };
 
-  const applyTitle = (
+  const addTodo = (
     title: string,
     setTitle: React.Dispatch<React.SetStateAction<string>>,
   ) => {
@@ -78,36 +72,34 @@ export const App: React.FC = () => {
 
     createTodo(title.trim())
       .then(todo => {
-        setTempTodo(null);
         setTitle('');
 
         setAllTodos([...allTodos, todo]);
       })
       .catch(() => {
-        setTempTodo(null);
-
         setError(ErrorMsg.ADD_TODO_ERROR);
         wait(3000, true).then(() => setError(''));
+      })
+      .finally(() => {
+        setTempTodo(null);
       });
   };
 
   const deleteTodo = (todoId: number, clearCompletedTodos?: boolean): void => {
     setLoading(todoId, true);
 
-    wait(200).then(() => {
-      deleteTodoFromServer(todoId)
-        .then(() => {
-          if (!clearCompletedTodos) {
-            setAllTodos(allTodos.filter(todo => todo.id !== todoId));
-          }
-        })
-        .catch(() => {
-          setLoading(todoId, false);
+    deleteTodoFromServer(todoId)
+      .then(() => {
+        if (!clearCompletedTodos) {
+          setAllTodos(allTodos.filter(todo => todo.id !== todoId));
+        }
+      })
+      .catch(() => {
+        setLoading(todoId, false);
 
-          setError(ErrorMsg.DELETE_TODO_ERROR);
-          wait(3000, true).then(() => setError(''));
-        });
-    });
+        setError(ErrorMsg.DELETE_TODO_ERROR);
+        wait(3000, true).then(() => setError(''));
+      });
   };
 
   return (
@@ -115,11 +107,7 @@ export const App: React.FC = () => {
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <Header
-          applyTitle={applyTitle}
-          tempTodo={tempTodo}
-          allTodos={allTodos}
-        />
+        <Header addTodo={addTodo} tempTodo={tempTodo} allTodos={allTodos} />
 
         <TodoList
           todos={queuedTodos}

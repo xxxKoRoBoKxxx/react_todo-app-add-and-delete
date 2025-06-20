@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Todo } from '../../types/Todo';
 
 type Props = {
-  applyTitle: (
+  addTodo: (
     title: string,
     setTitle: React.Dispatch<React.SetStateAction<string>>,
   ) => void;
@@ -11,13 +11,13 @@ type Props = {
   allTodos: Todo[];
 };
 
-export const Header: React.FC<Props> = ({ applyTitle, tempTodo, allTodos }) => {
+export const Header: React.FC<Props> = ({ addTodo, tempTodo, allTodos }) => {
   const [title, setTitle] = useState<string>('');
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    applyTitle(title, setTitle);
+    addTodo(title, setTitle);
   };
 
   const inputRef = useRef<HTMLInputElement>(null);
